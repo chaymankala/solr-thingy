@@ -24,7 +24,8 @@
     "helmet": "^3.15.0",
     "morgan": "^1.9.1",
     "request": "^2.88.0",
-    "request-promise": "^4.2.5"
+    "request-promise": "^4.2.5",
+    "sentiment": "^5.0.2"
   },
   "devDependencies": {
     "eslint": "^5.12.0",
