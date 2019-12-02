@@ -20,11 +20,12 @@ app.use(cors())
 app.use(morgan('dev'));
 app.use(helmet());
 
-const BASE_URL = "http://ec2-18-219-106-64.us-east-2.compute.amazonaws.com:8983/solr/IRF19P4/"
+const BASE_URL = "http://3.14.153.158:8983/solr/IRF19P1/"
 
 app.get('/select', async (req, res) => {
   try {
-    let _result = await rp.get(BASE_URL + "select" + objectToQuerystring(req.query), { json: true });
+    console.log(objectToQuerystring(req.query));
+    let _result = await rp.get(BASE_URL + "select?" + objectToQuerystring(req.query), { json: true });
     if (_result && _result.response && _result.response.docs && _result.response.docs.length) {
       for (let i of _result.response.docs) {
         if (i.tweet_text && i.tweet_text[0]) {
@@ -49,13 +50,18 @@ app.use(middlewares.errorHandler);
 
 
 function objectToQuerystring(obj) {
-  return Object.keys(obj).reduce(function (str, key, i) {
-    var delimiter, val;
-    delimiter = (i === 0) ? '?' : '&';
-    key = encodeURIComponent(key);
-    val = encodeURIComponent(obj[key]);
-    return [str, delimiter, key, '=', val].join('');
-  }, '');
+  let _ = ""
+  for (let i in obj) {
+    if (Array.isArray(obj[i])) {
+      for (let j of obj[i]) {
+        _ += (`${i}=${encodeURIComponent(j)}&`)
+      }
+    }
+    else {
+      _ += (`${i}=${encodeURIComponent(obj[i])}&`)
+    }
+  }
+  return _?_.substr(0, _.length-1):"";
 }
 
 module.exports = app;
