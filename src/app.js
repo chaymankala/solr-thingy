@@ -11,6 +11,9 @@ require('dotenv').config();
 const middlewares = require('./middlewares');
 const api = require('./api');
 
+const topic_links = require("./static/topics.json");
+const topic_counts = require("./static/tt.json");
+
 const app = express();
 
 const rp = require("request-promise");
@@ -20,7 +23,7 @@ app.use(cors())
 app.use(morgan('dev'));
 app.use(helmet());
 
-const BASE_URL = "http://3.14.153.158:8983/solr/IRF19P1/"
+const BASE_URL = "http://ec2-3-135-248-84.us-east-2.compute.amazonaws.com:8983/solr/IRF19P1/"
 
 app.get('/select', async (req, res) => {
   try {
@@ -37,6 +40,26 @@ app.get('/select', async (req, res) => {
     }
     return res.json(_result);
 
+  }
+  catch (e) {
+    return res.status(500).json(e);
+  }
+});
+
+app.get('/topics', async (req, res) => {
+  try {
+    return res.json(topic_links[req.query.q] || []);
+
+  }
+  catch (e) {
+    return res.status(500).json(e);
+  }
+});
+
+
+app.get('/topics_pie', async (req, res) => {
+  try {
+    return res.json(topic_counts);
   }
   catch (e) {
     return res.status(500).json(e);
@@ -61,7 +84,35 @@ function objectToQuerystring(obj) {
       _ += (`${i}=${encodeURIComponent(obj[i])}&`)
     }
   }
-  return _?_.substr(0, _.length-1):"";
+  return _ ? _.substr(0, _.length - 1) : "";
 }
+
+function convertTxt() {
+  let fs = require("fs");
+  let en = require("./static/en_t.json");
+  let enx = {};
+  for (let i of en) {
+    if (!enx[i.Topic_key_word]) {
+      enx[i.Topic_key_word] = 0;
+    }
+    enx[i.Topic_key_word]++;
+  }
+  let pt = require("./static/pt_t.json");
+  for (let i of pt) {
+    if (!enx[i.Topic_key_word]) {
+      enx[i.Topic_key_word] = 0;
+    }
+    enx[i.Topic_key_word]++;
+  }
+  let d = [];
+  for (let i in enx) {
+    d.push({
+      topic: i,
+      count: enx[i]
+    })
+  }
+  fs.writeFileSync("src/static/tt.json", JSON.stringify(d, undefined, 4));
+}
+convertTxt();
 
 module.exports = app;
