@@ -23,7 +23,7 @@ app.use(cors())
 app.use(morgan('dev'));
 app.use(helmet());
 
-const BASE_URL = "http://ec2-3-135-248-84.us-east-2.compute.amazonaws.com:8983/solr/IRF19P1/"
+const BASE_URL = "http://ec2-3-17-147-142.us-east-2.compute.amazonaws.com:8983/solr/IRF19P1/"
 
 app.get('/select', async (req, res) => {
   try {
